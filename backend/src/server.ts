@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node'
 import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
 import path from 'path'
@@ -8,6 +9,8 @@ import eventsPlugin from './routes/events'
 
 export async function buildServer() {
   const fastify = Fastify({ logger: true })
+
+  Sentry.setupFastifyErrorHandler(fastify)
 
   await runMigrations()
 
