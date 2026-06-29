@@ -17,11 +17,11 @@ RUN npm run build
 # Stage 3: Production image
 FROM node:20-alpine
 WORKDIR /app
-COPY --from=backend-build /app/backend/dist ./dist
-COPY --from=backend-build /app/backend/node_modules ./node_modules
-COPY --from=backend-build /app/backend/package.json .
-COPY --from=backend-build /app/backend/migrations ./migrations
+COPY --from=backend-build /app/backend/dist ./backend/dist
+COPY --from=backend-build /app/backend/node_modules ./backend/node_modules
+COPY --from=backend-build /app/backend/package.json ./backend/
+COPY --from=backend-build /app/backend/migrations ./backend/migrations
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["node", "dist/index.js"]
+CMD ["node", "backend/dist/index.js"]
