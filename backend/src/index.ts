@@ -3,7 +3,7 @@ import { buildServer } from './server'
 
 Sentry.init({
   dsn: 'https://84f925b4f46d44369415d860c28e4270@logs.tsteil.com/1',
-  environment: process.env.NODE_ENV ?? 'development',
+  environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV ?? 'development',
 })
 
 const port = parseInt(process.env.PORT ?? '3000', 10)
