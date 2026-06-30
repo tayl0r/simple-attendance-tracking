@@ -18,6 +18,7 @@ function parseDate(dateStr: string): string {
 }
 
 export function parseScheduleImport(text: string): ParsedGame[] {
+  if (typeof text !== 'string') return []
   const lines = text.split('\n')
   let currentWeek: number | null = null
   const seen = new Set<string>()

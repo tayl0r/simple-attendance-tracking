@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node'
 import { buildServer } from './server'
 
 Sentry.init({
-  dsn: 'https://84f925b4f46d44369415d860c28e4270@logs.tsteil.com/1',
+  dsn: process.env.GLITCHTIP_DSN,
   environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV ?? 'development',
 })
 
