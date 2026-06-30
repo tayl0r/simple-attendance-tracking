@@ -1,6 +1,7 @@
 export function parsePlayerImport(
   text: string
 ): { firstName: string; lastName: string }[] {
+  if (typeof text !== 'string') return []
   const lines = text.split('\n')
 
   // Format A: "First Last ..." all on one header line
