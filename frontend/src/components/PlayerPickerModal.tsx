@@ -25,9 +25,9 @@ export default function PlayerPickerModal({ players, initialSelected, onSave }: 
     }}>
       <div style={{ background: 'white', padding: 24, borderRadius: 12, minWidth: 300, maxWidth: 400, width: '90%' }}>
         <h2 style={{ marginTop: 0 }}>Who are you tracking?</h2>
-        <p style={{ color: '#555', fontSize: 14 }}>Select all players you want to record attendance for.</p>
+        <p style={{ color: '#555', fontSize: 14 }}>Select all players you want to record attendance for:</p>
         <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-          {players.map(p => (
+          {[...players].sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name)).map(p => (
             <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', cursor: 'pointer' }}>
               <input
                 type="checkbox"
