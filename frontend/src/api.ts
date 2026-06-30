@@ -28,6 +28,8 @@ export const api = {
     delete: (id: string) => req<void>('DELETE', `/rosters/${id}`),
     addPlayer: (id: string, firstName: string, lastName: string) =>
       req<Player>('POST', `/rosters/${id}/players`, { first_name: firstName, last_name: lastName }),
+    updatePlayer: (id: string, playerId: string, firstName: string, lastName: string) =>
+      req<Player>('PUT', `/rosters/${id}/players/${playerId}`, { first_name: firstName, last_name: lastName }),
     deletePlayer: (id: string, playerId: string) =>
       req<void>('DELETE', `/rosters/${id}/players/${playerId}`),
     import: (id: string, text: string) =>

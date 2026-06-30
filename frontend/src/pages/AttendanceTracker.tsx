@@ -162,7 +162,9 @@ export default function AttendanceTracker() {
 
   const locked = currentEvent ? isEventLocked(currentEvent) : false
   const eventIdx = currentEvent ? events.findIndex(e => e.id === currentEvent.id) : -1
-  const selectedPlayers = players.filter(p => selectedIds.includes(p.id))
+  const selectedPlayers = players
+    .filter(p => selectedIds.includes(p.id))
+    .sort((a, b) => a.first_name.localeCompare(b.first_name))
 
   return (
     <div className="page">
@@ -248,7 +250,7 @@ export default function AttendanceTracker() {
               Full Attendance ({allAttendance.length} players)
             </summary>
             <div style={{ marginTop: 8 }}>
-              {allAttendance.map(row => (
+              {[...allAttendance].sort((a, b) => a.first_name.localeCompare(b.first_name)).map(row => (
                 <div key={row.player_id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f0f0f0' }}>
                   <span>{row.first_name} {row.last_name}</span>
                   <span>

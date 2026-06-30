@@ -88,6 +88,20 @@ const rosters: FastifyPluginCallback = (fastify, _opts, done) => {
     return row
   })
 
+  // Update player name
+  fastify.put<{ Params: { id: string; playerId: string }; Body: { first_name: string; last_name: string } }>(
+    '/rosters/:id/players/:playerId',
+    async (req, reply) => {
+      const { first_name, last_name } = req.body
+      const { rows } = await pool.query(
+        'UPDATE players SET first_name = $1, last_name = $2 WHERE id = $3 AND roster_id = $4 RETURNING *',
+        [first_name, last_name, req.params.playerId, req.params.id]
+      )
+      if (!rows[0]) return reply.code(404).send({ error: 'Not found' })
+      return rows[0]
+    }
+  )
+
   // Delete player
   fastify.delete<{ Params: { id: string; playerId: string } }>(
     '/rosters/:id/players/:playerId',

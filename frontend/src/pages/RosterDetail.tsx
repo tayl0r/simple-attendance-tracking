@@ -10,6 +10,9 @@ export default function RosterDetail() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [importText, setImportText] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editFirst, setEditFirst] = useState('')
+  const [editLast, setEditLast] = useState('')
   const [toast, setToast] = useState<string | null>(null)
   const [loadError, setLoadError] = useState(false)
 
@@ -51,6 +54,23 @@ export default function RosterDetail() {
       load()
     } catch {
       showToast('Failed to add player')
+    }
+  }
+
+  function startEdit(p: Player) {
+    setEditingId(p.id)
+    setEditFirst(p.first_name)
+    setEditLast(p.last_name)
+  }
+
+  async function saveEdit(playerId: string) {
+    if (!id || !editFirst.trim() || !editLast.trim()) return
+    try {
+      await api.rosters.updatePlayer(id, playerId, editFirst.trim(), editLast.trim())
+      setEditingId(null)
+      load()
+    } catch {
+      showToast('Failed to save player')
     }
   }
 
@@ -113,10 +133,26 @@ export default function RosterDetail() {
 
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Players ({roster.players.length})</h3>
-        {roster.players.map((p: Player) => (
-          <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
-            <span>{p.first_name} {p.last_name}</span>
-            <button className="btn btn-sm btn-danger" onClick={() => deletePlayer(p.id)}>✕</button>
+        {[...roster.players].sort((a, b) => a.first_name.localeCompare(b.first_name)).map((p: Player) => (
+          <div key={p.id} style={{ padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+            {editingId === p.id ? (
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input value={editFirst} onChange={e => setEditFirst(e.target.value)}
+                  style={{ flex: 1, padding: '4px 8px', border: '1px solid #ccc', borderRadius: 4 }} />
+                <input value={editLast} onChange={e => setEditLast(e.target.value)}
+                  style={{ flex: 1, padding: '4px 8px', border: '1px solid #ccc', borderRadius: 4 }} />
+                <button className="btn btn-primary btn-sm" onClick={() => saveEdit(p.id)}>Save</button>
+                <button className="btn btn-sm" onClick={() => setEditingId(null)}>Cancel</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{p.first_name} {p.last_name}</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button className="btn btn-sm" onClick={() => startEdit(p)}>Edit</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => deletePlayer(p.id)}>✕</button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
