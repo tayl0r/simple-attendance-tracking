@@ -244,6 +244,29 @@ export default function AttendanceTracker() {
             )
           })}
 
+          {/* Attendance stats */}
+          {allAttendance.length > 0 && (() => {
+            const yes = allAttendance.filter(r => r.status === 'yes').length
+            const no = allAttendance.filter(r => r.status === 'no').length
+            const maybe = allAttendance.filter(r => r.status === 'maybe').length
+            return (
+              <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: '#f0fdf4', borderRadius: 8 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#16a34a' }}>{yes}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>Yes</div>
+                </div>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: '#fef2f2', borderRadius: 8 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#dc2626' }}>{no}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>No</div>
+                </div>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: '#fffbeb', borderRadius: 8 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#d97706' }}>{maybe}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>Maybe</div>
+                </div>
+              </div>
+            )
+          })()}
+
           {/* Full attendance list */}
           <details style={{ marginTop: 24 }}>
             <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
