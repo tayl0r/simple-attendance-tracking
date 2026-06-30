@@ -27,8 +27,8 @@ Backend runs on `:3000`, frontend dev server proxies API calls.
 
 | Environment | URL | Branch |
 |---|---|---|
-| Production | https://attendance.tsteil.com | `main` |
-| Dev | https://attendance-dev.tsteil.com | `dev` |
+| Production | https://attendance.tsteil.com | `prod` |
+| Dev | https://attendance-dev.tsteil.com | `main` |
 
 Push to either branch to trigger a deploy via GitHub Actions.
 
