@@ -249,6 +249,7 @@ export default function AttendanceTracker() {
             const yes = allAttendance.filter(r => r.status === 'yes').length
             const no = allAttendance.filter(r => r.status === 'no').length
             const maybe = allAttendance.filter(r => r.status === 'maybe').length
+            const unanswered = allAttendance.filter(r => !r.status).length
             return (
               <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: '#f0fdf4', borderRadius: 8 }}>
@@ -262,6 +263,10 @@ export default function AttendanceTracker() {
                 <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: '#fffbeb', borderRadius: 8 }}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: '#d97706' }}>{maybe}</div>
                   <div style={{ fontSize: 12, color: '#555' }}>Maybe</div>
+                </div>
+                <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: '#f5f5f5', borderRadius: 8 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#888' }}>{unanswered}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>Pending</div>
                 </div>
               </div>
             )
