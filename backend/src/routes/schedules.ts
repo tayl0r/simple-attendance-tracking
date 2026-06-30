@@ -98,6 +98,12 @@ const schedules: FastifyPluginCallback = (fastify, _opts, done) => {
       team?: string | null
     }
   }>('/schedules/:id/events', async (req, reply) => {
+    const { rows: [schedule] } = await pool.query(
+      'SELECT 1 FROM schedules WHERE id = $1',
+      [req.params.id]
+    )
+    if (!schedule) return reply.code(404).send({ error: 'Not found' })
+
     const { type, date, time, location, week, home_team, away_team, team } = req.body
 
     // Null out type-specific fields based on type
@@ -132,7 +138,13 @@ const schedules: FastifyPluginCallback = (fastify, _opts, done) => {
   // Import schedule from paste
   fastify.post<{ Params: { id: string }; Body: { text: string } }>(
     '/schedules/:id/import',
-    async (req) => {
+    async (req, reply) => {
+      const { rows: [schedule] } = await pool.query(
+        'SELECT 1 FROM schedules WHERE id = $1',
+        [req.params.id]
+      )
+      if (!schedule) return reply.code(404).send({ error: 'Not found' })
+
       const games = parseScheduleImport(req.body.text)
       let added = 0
 
@@ -164,6 +176,18 @@ const schedules: FastifyPluginCallback = (fastify, _opts, done) => {
   fastify.post<{ Params: { id: string }; Body: { roster_id: string } }>(
     '/schedules/:id/rosters',
     async (req, reply) => {
+      const { rows: [schedule] } = await pool.query(
+        'SELECT 1 FROM schedules WHERE id = $1',
+        [req.params.id]
+      )
+      if (!schedule) return reply.code(404).send({ error: 'Not found' })
+
+      const { rows: [roster] } = await pool.query(
+        'SELECT 1 FROM rosters WHERE id = $1',
+        [req.body.roster_id]
+      )
+      if (!roster) return reply.code(400).send({ error: 'Roster not found' })
+
       await pool.query(
         `INSERT INTO schedule_rosters (schedule_id, roster_id)
          VALUES ($1, $2)

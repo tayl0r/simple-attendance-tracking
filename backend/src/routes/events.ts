@@ -88,6 +88,12 @@ const events: FastifyPluginCallback = (fastify, _opts, done) => {
     )
     if (!ev) return reply.code(409).send({ error: 'Event is locked or not found' })
 
+    const { rows: [player] } = await pool.query(
+      'SELECT 1 FROM players WHERE id = $1',
+      [req.params.playerId]
+    )
+    if (!player) return reply.code(404).send({ error: 'Player not found' })
+
     const { status, notes } = req.body
     await pool.query(
       `INSERT INTO attendance (event_id, player_id, status, notes, updated_at)

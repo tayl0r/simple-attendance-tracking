@@ -75,6 +75,12 @@ const rosters: FastifyPluginCallback = (fastify, _opts, done) => {
     Params: { id: string }
     Body: { first_name: string; last_name: string }
   }>('/rosters/:id/players', async (req, reply) => {
+    const { rows: [roster] } = await pool.query(
+      'SELECT 1 FROM rosters WHERE id = $1',
+      [req.params.id]
+    )
+    if (!roster) return reply.code(404).send({ error: 'Not found' })
+
     const { first_name, last_name } = req.body
     const { rows: [row] } = await pool.query(
       `INSERT INTO players (id, roster_id, first_name, last_name)
@@ -117,7 +123,13 @@ const rosters: FastifyPluginCallback = (fastify, _opts, done) => {
   // Import players from paste
   fastify.post<{ Params: { id: string }; Body: { text: string } }>(
     '/rosters/:id/import',
-    async (req) => {
+    async (req, reply) => {
+      const { rows: [roster] } = await pool.query(
+        'SELECT 1 FROM rosters WHERE id = $1',
+        [req.params.id]
+      )
+      if (!roster) return reply.code(404).send({ error: 'Not found' })
+
       const parsed = parsePlayerImport(req.body.text)
       let added = 0
       for (const p of parsed) {
