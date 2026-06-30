@@ -68,6 +68,10 @@ export default function RosterDetail() {
     if (!id || !importText.trim()) return
     try {
       const { added } = await api.rosters.import(id, importText)
+      if (added === 0) {
+        showToast('No players recognized — check the pasted format')
+        return
+      }
       setImportText('')
       showToast(`Added ${added} player${added !== 1 ? 's' : ''}`)
       load()
