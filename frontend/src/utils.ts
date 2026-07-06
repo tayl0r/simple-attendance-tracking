@@ -31,22 +31,36 @@ export function formatDate(date: string): string {
   })
 }
 
+// A viewer's choice for a schedule: either track specific players (and record
+// their attendance), or just browse the schedule read-only.
+export type Selection =
+  | { mode: 'tracking'; playerIds: string[] }
+  | { mode: 'browsing' }
+
 function storageKey(scheduleId: string): string {
   return `attendance:${scheduleId}:players`
 }
 
-export function loadSelectedPlayerIds(scheduleId: string): string[] {
+export function loadSelection(scheduleId: string): Selection | null {
   try {
     const raw = localStorage.getItem(storageKey(scheduleId))
-    return raw ? (JSON.parse(raw) as string[]) : []
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (parsed === 'browsing') return { mode: 'browsing' }
+    // Legacy + current format: a non-empty array of player IDs = tracking.
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return { mode: 'tracking', playerIds: parsed as string[] }
+    }
+    return null
   } catch {
-    return []
+    return null
   }
 }
 
-export function saveSelectedPlayerIds(scheduleId: string, ids: string[]): void {
+export function saveSelection(scheduleId: string, selection: Selection): void {
   try {
-    localStorage.setItem(storageKey(scheduleId), JSON.stringify(ids))
+    const value = selection.mode === 'browsing' ? 'browsing' : selection.playerIds
+    localStorage.setItem(storageKey(scheduleId), JSON.stringify(value))
   } catch {
     // Fail silently if localStorage unavailable
   }

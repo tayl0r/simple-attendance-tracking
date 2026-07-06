@@ -5,9 +5,10 @@ interface Props {
   players: Player[]
   initialSelected: string[]
   onSave: (ids: string[]) => void
+  onBrowse: () => void
 }
 
-export default function PlayerPickerModal({ players, initialSelected, onSave }: Props) {
+export default function PlayerPickerModal({ players, initialSelected, onSave, onBrowse }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSelected))
 
   function toggle(id: string) {
@@ -50,6 +51,16 @@ export default function PlayerPickerModal({ players, initialSelected, onSave }: 
         >
           Done
         </button>
+        <button
+          className="btn"
+          style={{ width: '100%', marginTop: 8 }}
+          onClick={onBrowse}
+        >
+          Just Browsing
+        </button>
+        <p style={{ color: '#888', fontSize: 12, textAlign: 'center', marginTop: 8, marginBottom: 0 }}>
+          View the schedule and attendance without recording anything.
+        </p>
       </div>
     </div>
   )

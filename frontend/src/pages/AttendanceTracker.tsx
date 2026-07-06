@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import {
   isEventLocked, getDefaultEvent, formatDate, formatTime,
-  loadSelectedPlayerIds, saveSelectedPlayerIds,
+  loadSelection, saveSelection,
 } from '../utils'
 import PlayerPickerModal from '../components/PlayerPickerModal'
 import type { GameEvent, Player, AttendanceRow } from '../types'
@@ -20,6 +20,7 @@ export default function AttendanceTracker() {
   const [events, setEvents] = useState<GameEvent[]>([])
   const [players, setPlayers] = useState<Player[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [browsing, setBrowsing] = useState(false)
   const [showPicker, setShowPicker] = useState(false)
   const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null)
   const [attendance, setAttendance] = useState<Record<string, PlayerState>>({})
@@ -46,11 +47,18 @@ export default function AttendanceTracker() {
       setEvents(evs)
       setPlayers(pls)
 
-      const stored = loadSelectedPlayerIds(scheduleId)
-      const valid = stored.filter(id => pls.some(p => p.id === id))
-      if (valid.length > 0) {
-        saveSelectedPlayerIds(scheduleId, valid)
-        setSelectedIds(valid)
+      const selection = loadSelection(scheduleId)
+      if (selection?.mode === 'tracking') {
+        const valid = selection.playerIds.filter(id => pls.some(p => p.id === id))
+        if (valid.length > 0) {
+          saveSelection(scheduleId, { mode: 'tracking', playerIds: valid })
+          setSelectedIds(valid)
+          setShowPicker(false)
+        } else {
+          setShowPicker(true)
+        }
+      } else if (selection?.mode === 'browsing') {
+        setBrowsing(true)
         setShowPicker(false)
       } else {
         setShowPicker(true)
@@ -94,8 +102,17 @@ export default function AttendanceTracker() {
 
   function savePicker(ids: string[]) {
     if (!scheduleId) return
-    saveSelectedPlayerIds(scheduleId, ids)
+    saveSelection(scheduleId, { mode: 'tracking', playerIds: ids })
     setSelectedIds(ids)
+    setBrowsing(false)
+    setShowPicker(false)
+  }
+
+  function chooseBrowsing() {
+    if (!scheduleId) return
+    saveSelection(scheduleId, { mode: 'browsing' })
+    setSelectedIds([])
+    setBrowsing(true)
     setShowPicker(false)
   }
 
@@ -173,12 +190,22 @@ export default function AttendanceTracker() {
           players={players}
           initialSelected={selectedIds}
           onSave={savePicker}
+          onBrowse={chooseBrowsing}
         />
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ margin: 0, fontSize: 20 }}>Attendance</h1>
-        <button className="btn btn-sm" onClick={() => setShowPicker(true)}>Change Players</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h1 style={{ margin: 0, fontSize: 20 }}>Attendance</h1>
+          {browsing && (
+            <span style={{ fontSize: 12, color: '#888', border: '1px solid #ddd', borderRadius: 4, padding: '2px 6px' }}>
+              Browsing
+            </span>
+          )}
+        </div>
+        <button className="btn btn-sm" onClick={() => setShowPicker(true)}>
+          {browsing ? 'Pick Players' : 'Change Players'}
+        </button>
       </div>
 
       {events.length === 0 && <p>No events in this schedule yet.</p>}
@@ -206,10 +233,10 @@ export default function AttendanceTracker() {
             </div>
           </div>
 
-          {/* Your players */}
-          <h3>Your Players</h3>
-          {selectedPlayers.length === 0 && <p style={{ color: '#888' }}>No players selected.</p>}
-          {selectedPlayers.map(player => {
+          {/* Your players (hidden while just browsing — no actions in that mode) */}
+          {!browsing && <h3>Your Players</h3>}
+          {!browsing && selectedPlayers.length === 0 && <p style={{ color: '#888' }}>No players selected.</p>}
+          {!browsing && selectedPlayers.map(player => {
             const state = attendance[player.id] ?? { status: null, notes: '' }
             return (
               <div key={player.id} className="card" style={{ marginBottom: 8 }}>
