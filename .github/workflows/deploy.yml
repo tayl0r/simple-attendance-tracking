@@ -42,7 +42,8 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
           provenance: false
 
-  # The deploy key lives only in this reusable workflow, which a calling job can't add steps to.
+  # The deploy key lives only in this reusable workflow, which a calling job can't add steps to. Give no other
+  # job `environment: vps`.
   deploy:
     needs: build
     permissions:
