@@ -2,44 +2,57 @@ name: Deploy
 
 on:
   push:
-    branches: [prod]
+    branches: [main, prod]   # main -> dev, prod -> prod
+
+# One run at a time per branch, build and deploy together: a newer push waits for the running one instead
+# of cancelling it. What a cancel does to a deploy: vps DEPLOY.md, "One deploy at a time per deployment".
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
+    # Only main and prod build. A workflow_dispatch (or any trigger) from another branch would otherwise
+    # push a tag the deploy job then can't deploy (the vps environment allows only main and prod), leaving
+    # that tag on an undeployed image for the next deploy to ship.
+    if: github.ref_name == 'main' || github.ref_name == 'prod'
     runs-on: ubuntu-latest
+    timeout-minutes: 30      # a hung build would otherwise hold the branch's deploy queue for GitHub's 6 hours
     permissions:
       contents: read
-      packages: write
+      packages: write        # required: GITHUB_TOKEN is read-only by default, can't push to GHCR without this
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
           provenance: false
-          tags: ghcr.io/${{ github.repository }}:prod
 
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: GHCR_TOKEN
-          script: |
-            echo "$GHCR_TOKEN" | docker login ghcr.io -u tayl0r --password-stdin
-            cd /opt/apps/attendance
-            docker compose pull
-            docker compose up -d
-            docker image prune -f
+  # The deploy key lives only in this job, a reusable workflow that a calling job can't add steps to. The
+  # server picks the image and migration; this job names the deployment (vps DEPLOY.md, "How a deploy reaches the server").
+  deploy:
+    needs: build
+    permissions:
+      contents: read
+      packages: read         # the server pulls the image with this run's token
+    uses: tayl0r/vps-deploy/.github/workflows/deploy.yml@61ad38c841556dbd1c2d9e743d9659d6591a1d2f # v2.0.0
+    with:
+      # The app's name in the vps app manifest (not always the repo's): <app> from prod, <app>-dev from main.
+      # From the branch, never a build-job output, which the build could set. A name outside this app's
+      # deployments is refused, and pages.
+      target: ${{ github.ref_name == 'prod' && 'attendance' || 'attendance-dev' }}
+    secrets:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_DEPLOY_USER: ${{ secrets.VPS_DEPLOY_USER }}
+      VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
