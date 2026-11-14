@@ -49,3 +49,5 @@ The Postgres database (`attendance` prod / `attendance_dev` dev on the shared
 a new app image and restart it — they never touch the database or its volume.
 Migrations run on startup but are additive and tracked in `_migrations` (already-applied
 migrations are skipped), so promoting code never overwrites rosters/schedules/attendance.
+
+**Backups keep deleted data for up to 6 months.** This app's database is backed up hourly to the owner's Google Drive, encrypted, and kept for up to 6 months (vps `DEPLOY.md` § Backups). Anything user-facing that promises deletion (a privacy page, a delete-account flow, an email) must say that deleted data also leaves the backups within 6 months, never that no copy is kept.
