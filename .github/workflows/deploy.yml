@@ -11,10 +11,63 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    # Only main and prod build, whatever triggers are added later (a workflow_dispatch runs on any branch): the vps
-    # environment refuses other branches, so their image would sit on the tag undeployed for the next deploy to ship.
+  # Every other job needs this one, so it holds what decides whether the run goes on at all. It runs none of the
+  # commit's code, so a repo whose test stage is a reusable workflow (`uses:`, no steps) keeps it as it is.
+  guard:
+    # Only main and prod run, even for a workflow_dispatch from another branch: the vps environment refuses other
+    # branches, so their image would sit on the tag for the next deploy to ship, and a NAS runner takes only deploy runs.
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prod'   # full refs: a tag named main or prod doesn't match
+    # private repos: their own NAS runner (§ Self-hosted runners); public ones: GitHub's
+    runs-on: ${{ github.event.repository.private && 'nas' || 'ubuntu-latest' }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.ref == 'refs/heads/prod'   # only the next step reads the clone, so main skips it
+        with:
+          persist-credentials: false
+          fetch-depth: 0               # the next step reads origin/main
+
+      # prod is promoted from main by fast-forward (`git push origin main:prod`), so what it deploys has already
+      # been on main. A commit that never was is refused here, before any of its code runs: its install, its tests
+      # or its build.
+      - name: Refuse a prod commit that isn't on main
+        if: github.ref == 'refs/heads/prod'
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::prod is at $GITHUB_SHA, which isn't on main. Promote with \`git push origin main:prod\`."
+            exit 1
+          fi
+
+  # Tests the landed commit before anything is built. No workflow runs on pull requests, so this is the only run
+  # of the repo's checks outside a checkout.
+  test:
+    needs: guard
+    runs-on: ${{ github.event.repository.private && 'nas' || 'ubuntu-latest' }}
+    timeout-minutes: 30      # a hung test would otherwise block the deploy queue
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 20     # the Dockerfile's major (node:20-alpine): change them together
+          # Only GitHub's runners restore the npm cache: on a NAS runner it's slower than fetching.
+          cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
+          # Two packages and no root lockfile, so the cache keys on both lockfiles.
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - run: npm ci --prefix backend
+      - run: npm ci --prefix frontend
+      - run: npm run verify
+
+  build:
+    needs: [guard, test]     # guard by name, so this job never runs without it, whatever the test stage needs
     runs-on: ubuntu-latest
     timeout-minutes: 30      # a hung build would otherwise block the deploy queue
     permissions:

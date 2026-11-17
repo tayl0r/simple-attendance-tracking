@@ -16,31 +16,21 @@ says why in the job log's `VPS deploy` error, and on the gate's `deploy-gate:` l
 when the gate ran. Exit 2 (refused) also pages Taylor as a possible leaked deploy key,
 so find out why before re-running it.
 
+## Local checks
+
+**Local checks: `npm run verify`.** It runs the backend's build (`tsc`) and tests
+(`vitest run`), then the frontend's build (`tsc && vite build`). Run it before calling
+a PR ready: no workflow runs on pull requests. The deploy runs the same command before
+it builds, so a red check stops the deploy. Needs both packages' dependencies
+installed: `npm ci --prefix backend && npm ci --prefix frontend`.
+
 ## Git workflow
 
 **Feature work → `main`: squash-merge PRs.**
 Each PR lands as one clean commit on `main`. `main` is the integration branch and
 auto-deploys to dev.
 
-**Promotion `main` → `prod`: fast-forward push only.**
-```bash
-git push origin main:prod
-```
-This advances `prod` to main's exact commit (same SHA), so `prod` stays a strict
-prefix of `main` and is always fast-forwardable.
-
-**The invariant that keeps FF working:** `prod` must never receive a commit that
-isn't already on `main`.
-- Never commit directly to `prod`.
-- Never merge a PR *into* `prod` — every GitHub PR merge type (merge commit,
-  squash, rebase) creates a new commit on `prod` and re-diverges it, breaking the
-  fast-forward. Do review gating on `main` *before* promoting, not as a PR into prod.
-
-**If `prod` ever diverges** (someone PR-merged or committed to it directly), reset
-it back to main — safe whenever prod carries no unique *content*, only stray commits:
-```bash
-git push --force-with-lease=prod origin main:prod
-```
+**`prod` is fast-forward only.** Promote to prod with `git push origin main:prod`. Never commit directly to `prod`, and never create a merge commit on it — `prod` must always be a strict fast-forward of `main`. GitHub's `prod` ruleset refuses a force push or a merge commit, but not a commit made directly on `prod`.
 
 ## Data safety
 

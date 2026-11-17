@@ -1,3 +1,4 @@
+# Node major: deploy.yml's test job (setup-node `node-version`) runs on the same one, so change them together.
 # Stage 1: Build frontend
 FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
