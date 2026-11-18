@@ -1,4 +1,4 @@
-# Node major: keep it equal to .nvmrc, which deploy.yml's test job reads.
+# Node major: keep it equal to .nvmrc, which deploy.yml's test job reads. Nothing checks that the two match.
 # Stage 1: Build frontend
 FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
