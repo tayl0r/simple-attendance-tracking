@@ -30,7 +30,7 @@ installed: `npm ci --prefix backend && npm ci --prefix frontend`.
 Each PR lands as one clean commit on `main`. `main` is the integration branch and
 auto-deploys to dev.
 
-**`prod` is fast-forward only.** Promote to prod with `git fetch origin && git push origin origin/main:refs/heads/prod`, which pushes `main` as GitHub has it, never a local `main` that may hold an unpushed commit. Never commit directly to `prod`, never open a PR with base `prod`, and never create a merge commit on it — every commit on `prod` must already be on `main` (`prod` is always an ancestor of `main`), so the promote fast-forwards it. GitHub's `prod` ruleset refuses a force push or a merge commit, but not a commit made directly on `prod`; a deploy workflow with the vps template's `guard` job refuses to deploy one, though not one that also edits the workflow (vps's DEPLOY.md (tayl0r/vps) § GitHub repo settings, "If `prod` diverges from `main` anyway"). If `guard` refuses a diverged `prod`, stop and tell Taylor: putting it back needs his admin login, and a revert or a PR on `prod` only adds another stray commit.
+**`prod` is fast-forward only.** Promote with `git fetch origin && git push origin origin/main:refs/heads/prod` (GitHub's `main`, never your local one). Never commit to `prod`, open a PR with base `prod`, or merge into it: GitHub can't refuse a direct commit, and one breaks every later promote. If the deploy's `guard` job says `prod` has diverged, stop and tell Taylor. The fix needs his admin login (vps `DEPLOY.md` § GitHub repo settings), and a revert or PR on `prod` makes it worse.
 
 ## Data safety
 
