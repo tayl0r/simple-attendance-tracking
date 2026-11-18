@@ -21,8 +21,7 @@ so find out why before re-running it.
 **Local checks: `npm run verify`.** It runs the backend's build (`tsc`) and tests
 (`vitest run`), then the frontend's build (`tsc && vite build`). Run it before calling
 a PR ready: no workflow runs on pull requests. The deploy runs the same command before
-it builds (plus a check that `.nvmrc` and the Dockerfile's `FROM node` share one Node
-major), so a red check stops the deploy. Needs both packages' dependencies
+it builds, so a red check stops the deploy. Needs both packages' dependencies
 installed: `npm ci --prefix backend && npm ci --prefix frontend`.
 
 ## Git workflow
@@ -31,7 +30,7 @@ installed: `npm ci --prefix backend && npm ci --prefix frontend`.
 Each PR lands as one clean commit on `main`. `main` is the integration branch and
 auto-deploys to dev.
 
-**`prod` is fast-forward only.** Promote to prod with `git fetch origin && git push origin origin/main:prod`, which pushes `main` as GitHub has it, never a local `main` that may hold an unpushed commit. Never commit directly to `prod`, never open a PR with base `prod`, and never create a merge commit on it — every commit on `prod` must already be on `main` (`prod` is always an ancestor of `main`), so the promote fast-forwards it. GitHub's `prod` ruleset refuses a force push or a merge commit, but not a commit made directly on `prod`; the deploy workflow's on-main check refuses to deploy one (DEPLOY.md § Deploy key and secrets covers what it can't stop).
+**`prod` is fast-forward only.** Promote to prod with `git fetch origin && git push origin origin/main:refs/heads/prod`, which pushes `main` as GitHub has it, never a local `main` that may hold an unpushed commit. Never commit directly to `prod`, never open a PR with base `prod`, and never create a merge commit on it — every commit on `prod` must already be on `main` (`prod` is always an ancestor of `main`), so the promote fast-forwards it. GitHub's `prod` ruleset refuses a force push or a merge commit, but not a commit made directly on `prod`; a deploy workflow with the vps template's `guard` job refuses to deploy one, though not one that also edits the workflow (vps's DEPLOY.md (tayl0r/vps) § GitHub repo settings, "If `prod` diverges from `main` anyway"). If `guard` refuses a diverged `prod`, stop and tell Taylor: putting it back needs his admin login, and a revert or a PR on `prod` only adds another stray commit.
 
 ## Data safety
 
