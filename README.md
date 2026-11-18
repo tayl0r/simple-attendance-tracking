@@ -19,6 +19,9 @@ cd backend && npm install && npm run dev
 
 # Frontend (separate terminal)
 cd frontend && npm install && npm run dev
+
+# Checks, from the repo root
+npm run verify
 ```
 
 Backend runs on `:3000`, frontend dev server proxies API calls.
@@ -30,7 +33,8 @@ Backend runs on `:3000`, frontend dev server proxies API calls.
 | Production | https://attendance.tsteil.com | `prod` |
 | Dev | https://attendance-dev.tsteil.com | `main` |
 
-Push to either branch to trigger a deploy via GitHub Actions.
+Pushing to `main` deploys dev; `git fetch origin && git push origin origin/main:refs/heads/prod` promotes it to production (CLAUDE.md § Git workflow).
+Every deploy runs `npm run verify` first, so a red check stops it (CLAUDE.md § Local checks).
 
 ## Error tracking
 
