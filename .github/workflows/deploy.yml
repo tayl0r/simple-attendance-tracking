@@ -40,8 +40,7 @@ jobs:
             exit 1
           fi
 
-  # Tests the landed commit before anything is built. No workflow runs on pull requests, so this is the only run
-  # of the repo's checks outside a checkout.
+  # No workflow runs on pull requests, so this is the only CI run of the checks.
   test:
     needs: guard
     runs-on: ${{ github.event.repository.private && 'nas' || 'ubuntu-latest' }}
