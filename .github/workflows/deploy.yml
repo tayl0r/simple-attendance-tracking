@@ -55,7 +55,7 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 20     # the Dockerfile's major (node:20-alpine): change them together
+          node-version-file: .nvmrc
           # Only GitHub's runners restore the npm cache: on a NAS runner it's slower than fetching.
           cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
           # Two packages and no root lockfile, so the cache keys on both lockfiles.

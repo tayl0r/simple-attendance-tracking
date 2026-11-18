@@ -34,7 +34,6 @@ Backend runs on `:3000`, frontend dev server proxies API calls.
 | Dev | https://attendance-dev.tsteil.com | `main` |
 
 Pushing to `main` deploys dev; `git push origin main:prod` promotes it to production (CLAUDE.md § Git workflow).
-Every deploy runs `npm run verify` first, so a red check stops it.
 
 ## Error tracking
 

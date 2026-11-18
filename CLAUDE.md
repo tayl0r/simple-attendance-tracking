@@ -30,7 +30,7 @@ installed: `npm ci --prefix backend && npm ci --prefix frontend`.
 Each PR lands as one clean commit on `main`. `main` is the integration branch and
 auto-deploys to dev.
 
-**`prod` is fast-forward only.** Promote to prod with `git push origin main:prod`. Never commit directly to `prod`, and never create a merge commit on it — `prod` must always be a strict fast-forward of `main`. GitHub's `prod` ruleset refuses a force push or a merge commit, but not a commit made directly on `prod`.
+**`prod` is fast-forward only.** Promote to prod with `git push origin main:prod`. Never commit directly to `prod`, never open a PR with base `prod`, and never create a merge commit on it — every commit on `prod` must already be on `main` (`prod` is always an ancestor of `main`), so `git push origin main:prod` fast-forwards it. GitHub's `prod` ruleset refuses a force push or a merge commit, but not a commit made directly on `prod`.
 
 ## Data safety
 
