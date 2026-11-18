@@ -30,7 +30,7 @@ installed: `npm ci --prefix backend && npm ci --prefix frontend`.
 Each PR lands as one clean commit on `main`. `main` is the integration branch and
 auto-deploys to dev.
 
-**`prod` is fast-forward only.** Promote with `git fetch origin && git push origin origin/main:refs/heads/prod` (GitHub's `main`, never your local one). Never commit to `prod`, open a PR with base `prod`, or merge into it: GitHub can't refuse a direct commit, and one breaks every later promote. If the deploy's `guard` job says `prod` has diverged, stop and tell Taylor. The fix needs his admin login (vps `DEPLOY.md` § GitHub repo settings), and a revert or PR on `prod` makes it worse.
+**`prod` is fast-forward only.** Promote with `git fetch origin && git push origin origin/main:refs/heads/prod` (GitHub's `main`, never your local one). Push nothing else to `prod`: no direct commit, no force push, no PR with base `prod`, no merge commit on it. If a push to `prod` or a prod deploy is refused, stop and tell Taylor: rollbacks and the fix for a diverged `prod` are his call, even though your gh login can do them (vps's `DEPLOY.md` (tayl0r/vps) § GitHub repo settings (every repo)).
 
 ## Data safety
 
