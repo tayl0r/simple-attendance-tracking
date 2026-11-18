@@ -88,7 +88,7 @@ jobs:
 
   build:
     needs: [guard, test]     # guard by name, so this job never runs without it, whatever the test stage needs
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.repository.private && 'nas' || 'ubuntu-latest' }}
     timeout-minutes: 30      # a hung build would otherwise block the deploy queue
     permissions:
       contents: read
