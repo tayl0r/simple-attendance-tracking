@@ -5,7 +5,6 @@ packages:
 # 7 days, in minutes: vps's DEPLOY.md (tayl0r/vps) § Dependency cooldown.
 minimumReleaseAge: 10080
 
-# esbuild's postinstall only swaps its JS launcher for the native binary, and vite, vitest and tsx run without it.
-# Listed as false, no install code runs, and pnpm 11's frozen install doesn't fail with ERR_PNPM_IGNORED_BUILDS.
+# false: skip esbuild's postinstall (only a launcher optimization) without pnpm 11 failing with ERR_PNPM_IGNORED_BUILDS.
 allowBuilds:
   esbuild: false

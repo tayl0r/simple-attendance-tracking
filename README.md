@@ -16,7 +16,7 @@ Needs pnpm: on the Node major `.nvmrc` names, `corepack enable` provides the ver
 # Start postgres
 docker compose up postgres -d
 
-# Dependencies, once, from the repo root: backend/ and frontend/ are one pnpm workspace
+# Dependencies, once, from the repo root
 pnpm install
 
 # Backend
