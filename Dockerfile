@@ -19,16 +19,14 @@ RUN pnpm -r build
 
 # Stage 2: the backend's production dependencies only
 FROM base AS prod-deps
-RUN pnpm install --frozen-lockfile --prod --filter attendance-backend
+RUN pnpm install --frozen-lockfile --prod --filter ./backend
 
-# Stage 3: production image, same layout as before: /app/backend/{dist,migrations}, /app/frontend/dist
+# Stage 3: production image
 FROM node:22-alpine
 WORKDIR /app
-# pnpm links each package's node_modules into the root's .pnpm store, so both go
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=prod-deps /app/backend/node_modules ./backend/node_modules
+# All of it: backend/node_modules holds only links into the root's node_modules/.pnpm
+COPY --from=prod-deps /app ./
 COPY --from=build /app/backend/dist ./backend/dist
-COPY backend/package.json ./backend/
 COPY backend/migrations ./backend/migrations
 COPY --from=build /app/frontend/dist ./frontend/dist
 ENV NODE_ENV=production
