@@ -10,18 +10,23 @@ A simple web app for tracking player attendance at youth soccer events — games
 
 ## Running locally
 
+Needs pnpm: on the Node major `.nvmrc` names, `corepack enable` provides the version `package.json` pins.
+
 ```bash
 # Start postgres
 docker compose up postgres -d
 
+# Dependencies, once, from the repo root: backend/ and frontend/ are one pnpm workspace
+pnpm install
+
 # Backend
-cd backend && npm install && npm run dev
+cd backend && pnpm dev
 
 # Frontend (separate terminal)
-cd frontend && npm install && npm run dev
+cd frontend && pnpm dev
 
 # Checks, from the repo root
-npm run verify
+pnpm verify
 ```
 
 Backend runs on `:3000`, frontend dev server proxies API calls.
@@ -34,7 +39,7 @@ Backend runs on `:3000`, frontend dev server proxies API calls.
 | Dev | https://attendance-dev.tsteil.com | `main` |
 
 Pushing to `main` deploys dev; `git fetch origin && git push origin origin/main:refs/heads/prod` promotes it to production (CLAUDE.md § Git workflow).
-Every deploy runs `npm run verify` first, so a red check stops it (CLAUDE.md § Local checks).
+Every deploy runs `pnpm verify` first, so a red check stops it (CLAUDE.md § Local checks).
 
 ## Error tracking
 
