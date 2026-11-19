@@ -1,0 +1,10 @@
+packages:
+  - backend
+  - frontend
+
+# 7 days, in minutes: vps's DEPLOY.md (tayl0r/vps) § Dependency cooldown.
+minimumReleaseAge: 10080
+
+# false: skip esbuild's postinstall (only a launcher optimization) without pnpm 11 failing with ERR_PNPM_IGNORED_BUILDS.
+allowBuilds:
+  esbuild: false
