@@ -19,8 +19,8 @@ so find out why before re-running it.
 ## Local checks
 
 **Local checks: `pnpm verify`.** It runs every package's `build` script, then every
-`test` script. Run it before calling a PR ready: no workflow runs on pull requests. The deploy runs the same
-command before it builds, so a red check stops the deploy. Needs
+`test` script. Run it before calling a PR ready: no workflow runs on pull requests. The
+deploy runs the same command before it builds, so a red check stops the deploy. Needs
 `pnpm install --frozen-lockfile` first, as the deploy runs it, at the repo root:
 backend/ and frontend/ are one pnpm workspace with one lockfile.
 
