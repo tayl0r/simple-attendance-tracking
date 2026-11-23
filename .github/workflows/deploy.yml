@@ -70,18 +70,15 @@ jobs:
         with:
           persist-credentials: false
 
+      # No `version:`: pnpm comes from package.json's `packageManager` (vps's DEPLOY.md (tayl0r/vps) § Dependency cooldown).
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          # Only GitHub's runners restore the npm cache: on a NAS runner it's slower than fetching.
-          cache: ${{ runner.environment == 'github-hosted' && 'npm' || '' }}
-          # Two packages and no root lockfile, so the cache keys on both lockfiles.
-          cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
-      - run: npm ci --prefix backend
-      - run: npm ci --prefix frontend
-      - run: npm run verify
+          # Only GitHub's runners restore the pnpm store from the cache: on a NAS runner it's slower than fetching.
+          cache: ${{ runner.environment == 'github-hosted' && 'pnpm' || '' }}
+      - run: pnpm install --frozen-lockfile   # re-checks every lockfile entry against the cooldown
+      - run: pnpm verify
 
   build:
     needs: [guard, test]     # guard by name, so this job never runs without it, whatever the test stage needs

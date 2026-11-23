@@ -1,6 +1,7 @@
 {
   "private": true,
+  "packageManager": "pnpm@11.5.0",
   "scripts": {
-    "verify": "npm --prefix backend run build && npm --prefix backend test && npm --prefix frontend run build"
+    "verify": "pnpm -r build && pnpm -r test"
   }
 }
