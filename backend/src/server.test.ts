@@ -30,6 +30,7 @@ describe('production server', () => {
     const res = await server.inject(url)
     expect(res.statusCode).toBe(200)
     expect(res.headers['content-type']).toMatch(/^text\/html/)
+    expect(res.body).toBe(fs.readFileSync(indexHtml, 'utf8'))
   })
 
   it('answers an API route next to the static files', async () => {

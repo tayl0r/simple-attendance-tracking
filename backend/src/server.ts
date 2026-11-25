@@ -22,9 +22,9 @@ export async function buildServer() {
 
   if (process.env.NODE_ENV === 'production') {
     await fastify.register(fastifyStatic, { root: frontendDist })
-    // Don't make this async or return the reply: fastify then awaits the response and adds
-    // `close` listeners, causing MaxListenersExceededWarning on every deep link (fastify 5 +
-    // Sentry).
+    // Keep this sync and don't return the reply. Returning it makes fastify await the response
+    // and add `close` listeners (MaxListenersExceededWarning on every deep link, fastify 5 +
+    // Sentry); an async handler that doesn't return it sends an empty 200.
     fastify.setNotFoundHandler((req, reply) => {
       if (req.method === 'GET' && !req.url.startsWith('/api')) {
         reply.sendFile('index.html')
