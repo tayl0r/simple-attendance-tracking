@@ -6,8 +6,8 @@ import { buildServer, frontendDist } from './server'
 vi.mock('./migrate', () => ({ runMigrations: async () => {} }))
 vi.mock('./db', () => ({ pool: { query: async () => ({ rows: [] }) } }))
 
-// The production branch of buildServer (@fastify/static and the SPA fallback), which nothing
-// else runs: a plugin that refuses this fastify version fails here, not at boot.
+// Covers buildServer's production-only branch (static + SPA fallback), so an incompatible
+// plugin fails here, not at boot.
 const indexHtml = path.join(frontendDist, 'index.html')
 
 describe('production server', () => {

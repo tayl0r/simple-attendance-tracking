@@ -22,10 +22,9 @@ export async function buildServer() {
 
   if (process.env.NODE_ENV === 'production') {
     await fastify.register(fastifyStatic, { root: frontendDist })
-    // Sync, and not returning the reply: sendFile() returns the reply before it's sent, and a
-    // reply is a thenable, so an async handler returning it makes fastify wait on the response
-    // finishing, which adds `close` listeners to it. On fastify 5 with Sentry enabled, that
-    // passed Node's limit and logged a MaxListenersExceededWarning on every deep link.
+    // Don't make this async or return the reply: fastify then awaits the response and adds
+    // `close` listeners, causing MaxListenersExceededWarning on every deep link (fastify 5 +
+    // Sentry).
     fastify.setNotFoundHandler((req, reply) => {
       if (req.method === 'GET' && !req.url.startsWith('/api')) {
         reply.sendFile('index.html')
