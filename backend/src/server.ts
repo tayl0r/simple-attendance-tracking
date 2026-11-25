@@ -7,6 +7,8 @@ import rostersPlugin from './routes/rosters'
 import schedulesPlugin from './routes/schedules'
 import eventsPlugin from './routes/events'
 
+export const frontendDist = path.join(__dirname, '../../frontend/dist')
+
 export async function buildServer() {
   const fastify = Fastify({ logger: true })
 
@@ -19,13 +21,16 @@ export async function buildServer() {
   await fastify.register(eventsPlugin, { prefix: '/api' })
 
   if (process.env.NODE_ENV === 'production') {
-    const frontendDist = path.join(__dirname, '../../frontend/dist')
     await fastify.register(fastifyStatic, { root: frontendDist })
-    fastify.setNotFoundHandler(async (req, reply) => {
+    // Keep this sync and don't return the reply. Returning it makes fastify await the response
+    // and add `close` listeners (MaxListenersExceededWarning on every deep link, fastify 5 +
+    // Sentry); an async handler that doesn't return it sends an empty 200.
+    fastify.setNotFoundHandler((req, reply) => {
       if (req.method === 'GET' && !req.url.startsWith('/api')) {
-        return reply.sendFile('index.html')
+        reply.sendFile('index.html')
+      } else {
+        reply.code(404).send({ error: 'Not Found' })
       }
-      reply.code(404).send({ error: 'Not Found' })
     })
   }
 
