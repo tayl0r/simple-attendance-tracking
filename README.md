@@ -5,7 +5,7 @@ A simple web app for tracking player attendance at youth soccer events — games
 ## Stack
 
 - **Backend:** TypeScript, Fastify 5, PostgreSQL (node-postgres)
-- **Frontend:** React 18, Vite 5, React Router 6
+- **Frontend:** React 18, Vite 6, React Router 6
 - **Deploy:** Single Docker container, GitHub Actions CI/CD
 
 ## Running locally
