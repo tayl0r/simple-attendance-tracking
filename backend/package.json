@@ -19,6 +19,6 @@
     "@types/pg": "^8",
     "tsx": "^4",
     "typescript": "^5",
-    "vitest": "^2"
+    "vitest": "^4"
   }
 }
