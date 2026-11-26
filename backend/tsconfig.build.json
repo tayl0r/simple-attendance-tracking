@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "noEmit": false },
-  "exclude": ["node_modules", "dist", "src/**/*.test.*", "src/**/*.spec.*"]
+  "exclude": ["src/**/*.test.*", "src/**/*.spec.*"]
 }
